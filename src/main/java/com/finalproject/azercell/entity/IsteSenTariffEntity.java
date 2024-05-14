@@ -1,8 +1,11 @@
 package com.finalproject.azercell.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Entity
 @Table(name = "istesen_tariff")
@@ -18,6 +21,10 @@ public class IsteSenTariffEntity {
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "creator_number")
     private NumberEntity number;
+
+//    @ManyToOne
+//    @JoinColumn(name = "number_id")
+//    private NumberEntity number;
 
     private Integer minutes;
     private Double internetAmount;

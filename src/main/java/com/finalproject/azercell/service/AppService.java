@@ -21,7 +21,7 @@ public class AppService {
     private final AppRepository appRepository;
 
     public void create(AppDto appDto) {
-        log.info("ActionLog.AppService.create has started");
+        log.info("ActionLog.AppService.create has started for {}", appDto.getName());
 
         var entity = appMapper.mapToEntity(appDto);
         appRepository.save(entity);
@@ -30,11 +30,11 @@ public class AppService {
     }
 
     public void update(Integer id, AppDto appDto) {
-        log.info("ActionLog.AppService.update has started");
+        log.info("ActionLog.AppService.update has started for id {}", id);
         var entity = appMapper.mapToEntity(appDto);
         entity.setId(id);
         appRepository.findById(id);
-        log.info("ActionLog.AppService.update has ended");
+        log.info("ActionLog.AppService.update has ended for id {}", id);
 
     }
 
@@ -46,21 +46,21 @@ public class AppService {
     }
 
     public AppEntity get(Integer id) {
-        log.info("ActionLog.AppService.get has started");
+        log.info("ActionLog.AppService.get has started for id {}", id);
         AppEntity app = appRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("APP_IS_NOT_FOUND")
         );
-        log.info("ActionLog.AppService.get has ended");
+        log.info("ActionLog.AppService.get has ended for id {}", id);
         return app;
     }
 
     public void delete(Integer id) {
-        log.info("ActionLog.AppService.delete has started");
+        log.info("ActionLog.AppService.delete has started for id {}", id);
         if (!appRepository.existsById(id)) {
             throw new NotFoundException("THIS_TARIFF_PACKAGE_IS_NOT_FOUND");
         }
         appRepository.deleteById(id);
-        log.info("ActionLog.AppService.delete has ended");
+        log.info("ActionLog.AppService.delete has ended for id {}", id);
 
     }
 }

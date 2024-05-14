@@ -30,5 +30,4 @@ public class NumberDto {
     private Integer freeInternet=0;
     private Integer userId;
     private Integer tariffId;
-    private Integer internetId;
 }

@@ -1,11 +1,12 @@
 package com.finalproject.azercell.service;
 
-import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.IsteSenTariffEntity;
 import com.finalproject.azercell.entity.TariffEntity;
 import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.enums.NumberStatus;
+import com.finalproject.azercell.exception.NotEnoughBalanceException;
 import com.finalproject.azercell.exception.NotFoundException;
+import com.finalproject.azercell.exception.NumberIsNotActiveException;
 import com.finalproject.azercell.exception.TariffCreateException;
 import com.finalproject.azercell.mapper.NumberMapper;
 import com.finalproject.azercell.model.NumberDto;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
@@ -92,18 +95,24 @@ public class NumberService {
         }
     }
 
-    public void assignTariffToNumber(Integer id, TariffEntity tariffEntity) {
+    public void assignTariffToNumber(Integer id, Integer tariffId) {
         log.info("ActionLog.NumberService.assignTariffToNumber has started");
 
         NumberEntity number = numberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + id));
-
+        if (number.getStatus() != NumberStatus.ACTIVE){
+            throw new NumberIsNotActiveException("Number is not active");
+        }
+        TariffEntity tariffEntity = tariffRepository.findById(tariffId).orElseThrow(() -> new NotFoundException("This tariff is not found"));
         number.setTariff(tariffEntity);
         number.setInternetBalance(tariffEntity.getInternetAmount());
         number.setMinuteBalance(tariffEntity.getMinuteAmount());
         number.setSmsBalance(tariffEntity.getSmsAmount());
 
         double totalCharge = tariffEntity.getSubscriptionPrice()+tariffEntity.getMonthlyPrice();
+        if (number.getBalance() < totalCharge){
+            throw new NotEnoughBalanceException("Not enough balance");
+        }
         number.setBalance(number.getBalance() - totalCharge);
         numberRepository.save(number);
 
@@ -113,8 +122,6 @@ public class NumberService {
 
     public void removeSubscriptionForNumber(Integer id) {
         log.info("ActionLog.NumberService.removeSubscriptionForNumber has started");
-
-
 
         NumberEntity number = numberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + id));
@@ -143,30 +150,42 @@ public class NumberService {
         NumberEntity number = numberRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Number not found"));
 
+        number.setTariff(null);
         IsteSenTariffEntity newTariff = IsteSenTariffEntity.builder().number(number)
                 .minutes(minutes)
                 .internetAmount(internetGb)
                 .totalCharge(checkPriceForIsteSen(minutes, internetGb))
-        .build();
-
-        number.setTariff(null);
+                .build();
+        if (number.getStatus() != NumberStatus.ACTIVE){
+            throw new NumberIsNotActiveException("Number is not active");
+        }
+        if (number.getBalance() < newTariff.getTotalCharge()){
+            throw new NotEnoughBalanceException("Not enough balance");
+        }
+        if (number.getIsteSenTariff() != null){
+            isteSenTariffRepository.deleteById((number.getIsteSenTariff().getId()));
+        }
         isteSenTariffRepository.save(newTariff);
         number.setIsteSenTariff(newTariff);
         number.setBalance(number.getBalance() - newTariff.getTotalCharge());
+
+        number.setMinuteBalance(newTariff.getMinutes());
+        number.setInternetBalance(newTariff.getInternetAmount());
+        number.setSmsBalance(0);
+
         numberRepository.save(number);
         log.info("ActionLog.NumberService.connectToOwnPackage has ended");
 
 
     }
-
     public void removeIsteSenSubscriptionForNumber(Integer id) {
         log.info("ActionLog.NumberService.removeIsteSenSubscriptionForNumber has started");
         NumberEntity number = numberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + id));
-        number.setIsteSenTariff(null);
-
+        if (number.getIsteSenTariff() != null){
+            isteSenTariffRepository.deleteById((number.getIsteSenTariff().getId()));
+        }
         numberRepository.save(number);
         log.info("ActionLog.NumberService.removeIsteSenSubscriptionForNumber has ended");
-
     }
 }

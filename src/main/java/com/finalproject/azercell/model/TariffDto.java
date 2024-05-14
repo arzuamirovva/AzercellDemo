@@ -26,8 +26,6 @@ public class TariffDto {
     private Integer smsAmount;
     private Double subscriptionPrice;
     private Double monthlyPrice;
-    private LocalDate startDate;
-    private LocalDate endDate;
     private String description;
 
 //    public void generateEndDate() {

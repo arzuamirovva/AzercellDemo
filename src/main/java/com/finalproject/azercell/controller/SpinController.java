@@ -4,10 +4,8 @@ import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.PrizeEntity;
 import com.finalproject.azercell.service.SpinService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,7 +18,8 @@ public class SpinController {
 
     private final SpinService spinService;
 
-    @PostMapping
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public void spin(@RequestHeader Integer numberId) {
         spinService.spin(numberId);
     }

@@ -33,7 +33,6 @@ public class SpinService {
             numberRepository.save(number);
         }
         log.info("ActionLog.SpinService.checkSpinTime has ended for {}",numberId);
-
     }
 
     public void spin(Integer numberId) {

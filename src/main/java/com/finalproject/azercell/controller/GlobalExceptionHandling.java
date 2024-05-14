@@ -34,8 +34,15 @@ public class GlobalExceptionHandling {
 
 
     @ExceptionHandler(UserAlreadyExist.class)
-    @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionDTO handle(UserAlreadyExist exception){
+        log.info("error -> {}", exception.getMessage());
+        return new ExceptionDTO(exception.getMessage());
+    }
+
+    @ExceptionHandler(NumberIsNotActiveException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDTO handle(NumberIsNotActiveException exception){
         log.info("error -> {}", exception.getMessage());
         return new ExceptionDTO(exception.getMessage());
     }

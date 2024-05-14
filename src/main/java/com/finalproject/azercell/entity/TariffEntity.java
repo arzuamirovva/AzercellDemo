@@ -22,8 +22,6 @@ public class TariffEntity {
     private Integer smsAmount;
     private Double subscriptionPrice;
     private Double monthlyPrice;
-    private LocalDate startDate;
-    private LocalDate endDate;
     private String description;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "tariff")

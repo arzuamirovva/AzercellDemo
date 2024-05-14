@@ -4,6 +4,7 @@ import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.PassportEntity;
 import com.finalproject.azercell.entity.UserEntity;
 
+import com.finalproject.azercell.enums.RoleEnum;
 import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.exception.UserAlreadyExist;
 import com.finalproject.azercell.mapper.UserMapper;
@@ -45,16 +46,18 @@ public class AuthService {
         if (userRepository.findByPassport(passport).isPresent()){
             throw new UserAlreadyExist("User Already Exist");
         }
-
         String number = dto.getNumber();
         if (numberRepository.findByNumber(number).isEmpty()){
             throw new NotFoundException("THIS_NUMBER_NOT_FOUND");
         }
         UserEntity entity = userMapper.mapToEntity(dto);
+        entity.setPassword(encoder.encode(entity.getPassword()));
         entity.setPassport((PassportEntity) passportRepository.findByFin(dto.getFin()).get()); //duzelt
+        entity.setRole(RoleEnum.CUSTOMER);
         userRepository.save(entity);
         var numberEntity = numberRepository.findByNumber(dto.getNumber()).orElseThrow(() -> new NotFoundException("Number Not Found"));
         numberEntity.setUser(entity);
+        numberEntity.setPassword(entity.getPassword());
         numberRepository.save(numberEntity);
         log.info("ActionLog.UserService.create has ended");
     }
@@ -75,7 +78,7 @@ public class AuthService {
             String token = jwtUtil.createToken(numberEntity1);
 
             LoginResponseDto response = new LoginResponseDto(username,token);
-            log.info("AAA");
+            log.info("Ended");
             return response;
 //            return ResponseEntity.status(HttpStatus.OK).header("userId", String.valueOf(entity.getId())).body(response);
         }catch (BadCredentialsException e){

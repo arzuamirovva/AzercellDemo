@@ -41,12 +41,14 @@ public class BillingService {
 
         NumberEntity number = numberRepository.findById(numberId)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + numberId));
-
+        if (number.getInternetBalance() == null) {
+            throw new NullPointerException("Internet balance is null for number with id: " + numberId);
+        }
         if (number.getInternetBalance() == 0){
             double totalCharge = dataUsageInMB * number.getTariff().getChargePerMB();
             number.setBalance(number.getBalance() - totalCharge);
         } else {
-            number.setInternetBalance(number.getInternetBalance() - dataUsageInMB);
+            number.setInternetBalance(number.getInternetBalance()*1000 - dataUsageInMB);
         }
         numberRepository.save(number);
         log.info("ActionLog.BillingService.chargeForInternetUsage has ended");

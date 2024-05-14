@@ -44,7 +44,7 @@ public class TariffService {
         log.info("ActionLog.TariffService.get has started");
 
         TariffDto dto = tariffMapper.mapToDto(tariffRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("INTERNET_PACKAGE_IS_NOT_FOUND")
+                () -> new NotFoundException("Tariff_IS_NOT_FOUND")
         ));
         log.info("ActionLog.TariffService.get has ended");
 

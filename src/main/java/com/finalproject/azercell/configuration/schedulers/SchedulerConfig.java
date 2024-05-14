@@ -14,7 +14,7 @@ public class SchedulerConfig {
 
     private final NumberService numberService;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(cron = "0 0 0 * * *")
     public void deactivateNumberDaily(){
         numberService.deactivateNumbersDaily();
     }

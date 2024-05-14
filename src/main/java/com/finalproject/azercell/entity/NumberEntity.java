@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Table(name = "numbers")
@@ -36,11 +37,14 @@ public class NumberEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tariff_id")
-    private TariffEntity tariff;
+    private TariffEntity tariff; // eslinde 1 nomrenin 1?
 
     @OneToOne(mappedBy = "number")
     @JoinColumn(name = "isteSenTariff_id")
     public IsteSenTariffEntity isteSenTariff;
+
+//    @OneToMany(mappedBy = "number")
+//    private List<IsteSenTariffEntity> isteSenTariff;
     public NumberEntity(String number, String password) {
         this.number = number;
         this.password = password;
