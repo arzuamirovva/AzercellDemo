@@ -1,32 +1,32 @@
 package com.finalproject.azercell.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Table( name = "tariffPackages")
+@Table( name = "tariffs")
 @Entity
 @Data
-public class TariffPackageEntity {
-
+public class TariffEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private Integer minuteLimit;
-    private Integer smsLimit;
-    private Double price;
+    private Double chargePerMinute;
+    private Double chargePerMB;
+    private Double chargePerSMS;
+    private Integer minuteAmount;
+    private Double internetAmount;
+    private Integer smsAmount;
+    private Double subscriptionPrice;
+    private Double monthlyPrice;
     private LocalDate startDate;
     private LocalDate endDate;
     private String description;
 
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "tariff")
     private List<NumberEntity> numbers;
 
-//    @OneToOne(cascade = CascadeType.ALL, mappedBy = "tariff")
-//    private PaymentEntity payment;
 }

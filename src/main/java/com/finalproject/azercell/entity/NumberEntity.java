@@ -2,41 +2,48 @@ package com.finalproject.azercell.entity;
 
 import com.finalproject.azercell.enums.NumberStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Table( name = "numbers")
+
+@Table(name = "numbers")
 @Entity
 @Data
+@NoArgsConstructor
 public class NumberEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String number;
+    private String password;
     @Enumerated(EnumType.STRING)
     private NumberStatus status;
+
     private Double balance;
-    private Boolean hasChance;
+    private Double internetBalance;
+    private Integer minuteBalance;
+    private Integer smsBalance;
+
     private LocalDateTime lastSpinTime;
+    private Boolean hasChance;
     private Integer freeMinutes=0;
     private Integer freeInternet=0;
+
     @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tariff_id")
-    private TariffPackageEntity tariff;
+    private TariffEntity tariff;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "internet_id")
-    private InternetPackageEntity internet;
+    @OneToOne(mappedBy = "number")
+    @JoinColumn(name = "isteSenTariff_id")
+    public IsteSenTariffEntity isteSenTariff;
+    public NumberEntity(String number, String password) {
+        this.number = number;
+        this.password = password;
+    }
 
-
-
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "balance")
-//    private BalanceEntity balance;
 }

@@ -1,5 +1,6 @@
 package com.finalproject.azercell.service;
 
+import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.mapper.PrizeMapper;
 import com.finalproject.azercell.model.PrizeDto;
 import com.finalproject.azercell.repository.PrizeRepository;
@@ -21,23 +22,43 @@ public class PrizeService {
     }
 
     public PrizeDto get(Integer id) {
-        return prizeMapper.mapToDto(prizeRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("PRIZE_NOT_FOUND")
+        log.info("ActionLog.PrizeService.get has started");
+
+        PrizeDto dto = prizeMapper.mapToDto(prizeRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("PRIZE_NOT_FOUND")
         ));
+        log.info("ActionLog.PrizeService.get has ended");
+        return dto;
     }
 
     public void create(PrizeDto prizeDto) {
+        log.info("ActionLog.PrizeService.create has started");
+
         var entity = prizeMapper.mapToEntity(prizeDto);
         prizeRepository.save(entity);
+        log.info("ActionLog.PrizeService.create has ended");
+
     }
 
     public void update(Integer id, PrizeDto prizeDto) {
+        log.info("ActionLog.PrizeService.update has started");
+
         var entity = prizeMapper.mapToEntity(prizeDto);
         entity.setId(id);
         prizeRepository.save(entity);
+        log.info("ActionLog.PrizeService.update has ended");
+
     }
 
     public void delete(Integer id) {
-        prizeRepository.deleteById(id);
+        log.info("ActionLog.PrizeService.delete has started");
+
+        if (prizeRepository.existsById(id)){
+            prizeRepository.deleteById(id);
+            log.info("ActionLog.PrizeService.delete has started");
+
+        }else{
+            throw new NotFoundException("Prize not found");
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.finalproject.azercell.service;
 
 import com.finalproject.azercell.entity.PassportEntity;
 import com.finalproject.azercell.entity.UserEntity;
+import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.mapper.UserMapper;
 import com.finalproject.azercell.model.UserRequestDto;
 import com.finalproject.azercell.model.UserResponseDto;
@@ -23,52 +24,48 @@ public class UserService {
     private final UserMapper userMapper;
     private final NumberRepository numberRepository;
     private final PassportRepository passportRepository;
-    public void create(UserRequestDto userRequestDto){
-        log.info("Create Method has started for {}", userRequestDto.getFin());
-        if (passportRepository.findByFin(userRequestDto.getFin()).isEmpty()){
-            throw new RuntimeException("Invalid Fin");
-        }
-
-
-        String number = userRequestDto.getNumber();
-        if (numberRepository.findByNumber(number).isEmpty()){
-            throw new RuntimeException("THIS_NUMBER_NOT_FOUND");
-        }
-        UserEntity entity = userMapper.mapToEntity(userRequestDto);
-        entity.setPassport((PassportEntity) passportRepository.findByFin(userRequestDto.getFin()).get());
-        userRepository.save(entity);
-        var numberEntity = numberRepository.findByNumber(userRequestDto.getNumber()).get();
-        numberEntity.setUser(entity);
-        numberRepository.save(numberEntity);
-        log.info("Create Method has finished for {}", userRequestDto.getFin());
-
-    }
 
     public void update(Integer id, UserRequestDto userRequestDto){
+        log.info("ActionLog.UserService.update has started");
+
         if (!userRepository.existsById(id)){
-            throw new RuntimeException("Not Found User");
+            throw new NotFoundException("Not Found User");
         }
         var user = userMapper.mapToEntity(userRequestDto);
         user.setId(id);
         userRepository.save(user);
+        log.info("ActionLog.UserService.update has ended");
+
     }
 
-    public List<UserResponseDto> getAll(){
-        return userRepository.findAll().stream().map( e -> userMapper.mapToDto((UserEntity) e)).toList();
+    public List getAll(){
+        log.info("ActionLog.UserService.getAll has started");
+
+        List list = userRepository.findAll().stream().map(e -> userMapper.mapToDto((UserEntity) e)).toList();
+
+        log.info("ActionLog.UserService.getAll has ended");
+        return list;
     }
 
     public UserResponseDto get(Integer id){
-        return userMapper.mapToDto(userRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("USER_NOT_FOUND")
+        log.info("ActionLog.UserService.get has started");
+
+        UserResponseDto dto = userMapper.mapToDto(userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("USER_NOT_FOUND")
         ));
+        log.info("ActionLog.UserService.get has ended");
+
+        return dto;
     }
 
     public void delete(Integer id){
+        log.info("ActionLog.UserService.delete has started");
+
         if (!userRepository.existsById(id)){
-            throw new RuntimeException("User Not Found");
+            throw new NotFoundException("User Not Found");
         }
         userRepository.deleteById(id);
+        log.info("ActionLog.UserService.delete has ended");
+
     }
-
-
 }

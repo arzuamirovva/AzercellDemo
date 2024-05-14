@@ -34,4 +34,10 @@ public class CardController {
     public List getAll(){
         return cardService.getAll();
     }
+
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id) {
+        cardService.delete(id);
+    }
 }

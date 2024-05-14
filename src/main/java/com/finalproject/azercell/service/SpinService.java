@@ -3,6 +3,7 @@ package com.finalproject.azercell.service;
 import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.PrizeEntity;
 import com.finalproject.azercell.enums.PrizeType;
+import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.repository.NumberRepository;
 import com.finalproject.azercell.repository.PrizeRepository;
 import com.finalproject.azercell.repository.UserRepository;
@@ -23,16 +24,22 @@ public class SpinService {
     private final PrizeRepository prizeRepository;
 
     public void checkSpinTime(Integer numberId) {
-        NumberEntity number = numberRepository.findById(numberId).get();
+        log.info("ActionLog.SpinService.checkSpinTime has started for {}",numberId);
+
+        NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number Not Found"));
         LocalDateTime lastSpinTime = number.getLastSpinTime();
         if (lastSpinTime == null || lastSpinTime.plusWeeks(1).isBefore(LocalDateTime.now())) {
             number.setHasChance(true);
             numberRepository.save(number);
         }
+        log.info("ActionLog.SpinService.checkSpinTime has ended for {}",numberId);
+
     }
 
     public void spin(Integer numberId) {
-        NumberEntity number = numberRepository.findById(numberId).get();
+        log.info("ActionLog.SpinService.spin has started for {}",numberId);
+
+        NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number Not Found"));
         checkSpinTime(numberId);
 
         if (number.getHasChance()) {
@@ -49,8 +56,10 @@ public class SpinService {
             number.setHasChance(false);
             number.setLastSpinTime(LocalDateTime.now());
             numberRepository.save(number);
+            log.info("ActionLog.SpinService.spin has ended for {}",numberId);
+
         } else {
-            throw new RuntimeException("NO_CHANCE");
+            throw new NotFoundException("NO_CHANCE");
         }
     }
 }

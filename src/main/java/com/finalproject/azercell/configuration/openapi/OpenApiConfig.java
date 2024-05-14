@@ -1,4 +1,4 @@
-package com.finalproject.azercell.configuration;
+package com.finalproject.azercell.configuration.openapi;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;

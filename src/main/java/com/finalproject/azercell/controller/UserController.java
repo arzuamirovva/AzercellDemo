@@ -16,10 +16,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public void create(@RequestBody @Valid UserRequestDto userRequestDto) {
-        userService.create(userRequestDto);
-    }
 
     @PutMapping("/{id}")
     public void update(@PathVariable Integer id, @RequestBody UserRequestDto userRequestDto) {

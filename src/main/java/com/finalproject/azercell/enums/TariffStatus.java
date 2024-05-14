@@ -1,6 +1,6 @@
 package com.finalproject.azercell.enums;
 
-public enum InternetPackageStatus {
+public enum TariffStatus {
     ACTIVE,
     EXPIRED,
     INACTIVE

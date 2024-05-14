@@ -20,18 +20,29 @@ public class BalanceHistoryService {
     private final BalanceHistoryRepository balanceHistoryRepository;
     private final BalanceHistoryMapper balanceHistoryMapper;
 
-    public void save(BalanceHistoryEntity balanceHistoryEntity){
+    public void save(BalanceHistoryEntity balanceHistoryEntity)
+    {
+        log.info("ActionLog.BalanceHistoryService.save has started");
         balanceHistoryRepository.save(balanceHistoryEntity);
+        log.info("ActionLog.BalanceHistoryService.save has ended");
+
     }
 
     public List<BalanceHistoryDto> get(Integer userId){
+        log.info("ActionLog.BalanceHistoryService.get has started");
 
         List<BalanceHistoryDto> balanceHistory = balanceHistoryRepository.findByUserId(userId);
         Collections.sort(balanceHistory, Comparator.comparing(BalanceHistoryDto::getDateTime));
+        log.info("ActionLog.BalanceHistoryService.get has ended");
         return balanceHistory;
     }
 
     public List<BalanceHistoryDto> getAll(){
-        return balanceHistoryRepository.findAll().stream().map(e -> balanceHistoryMapper.mapToDto((BalanceHistoryEntity) e)).toList();
+        log.info("ActionLog.BalanceHistoryService.getAll has started");
+
+        List<BalanceHistoryDto> balanceHistoryDtoList = balanceHistoryRepository.findAll().stream().map(e -> balanceHistoryMapper.mapToDto((BalanceHistoryEntity) e)).toList();
+        log.info("ActionLog.BalanceHistoryService.getAll has ended");
+
+        return balanceHistoryDtoList;
     }
 }
