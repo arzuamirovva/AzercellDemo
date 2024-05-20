@@ -1,5 +1,6 @@
 package com.finalproject.azercell.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.finalproject.azercell.enums.NumberStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,23 +32,31 @@ public class NumberEntity {
     private Integer freeMinutes=0;
     private Integer freeInternet=0;
 
-    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tariff_id")
-    private TariffEntity tariff; // eslinde 1 nomrenin 1?
+    private TariffEntity tariff;
 
     @OneToOne(mappedBy = "number")
     @JoinColumn(name = "isteSenTariff_id")
     public IsteSenTariffEntity isteSenTariff;
 
-//    @OneToMany(mappedBy = "number")
-//    private List<IsteSenTariffEntity> isteSenTariff;
+    @OneToMany(mappedBy = "number" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<BalanceHistoryEntity> balanceHistoryList;
+
     public NumberEntity(String number, String password) {
         this.number = number;
         this.password = password;
     }
 
+    public Integer getFreeMinutes() {
+        return this.freeMinutes != null ? this.freeMinutes : 0;
+    }
+    public Integer getFreeInternet() {
+        return this.freeInternet != null ? this.freeInternet : 0;
+    }
 }

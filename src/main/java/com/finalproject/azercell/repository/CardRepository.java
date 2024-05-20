@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface CardRepository extends CrudRepository<CardEntity, Integer> {
 
-    List findAll();
+    List<CardEntity> findAll();
 }

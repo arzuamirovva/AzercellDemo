@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface NumberRepository extends CrudRepository<NumberEntity, Integer> {
 
     Optional<NumberEntity> findByNumber(String number);
-    List findAll();
+    List<NumberEntity> findAll();
 }

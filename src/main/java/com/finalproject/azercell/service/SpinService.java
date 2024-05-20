@@ -47,10 +47,10 @@ public class SpinService {
 
             if (randomPrize.getPrizeType().equals(PrizeType.MINUTES)) {
                 number.setFreeMinutes(number.getFreeMinutes() + randomPrize.getAmount());
-                System.out.println("Minutes added");
+                System.out.println(randomPrize.getAmount() + "Minutes added");
             } else if (randomPrize.getPrizeType().equals(PrizeType.INTERNET)) {
                 number.setFreeInternet(number.getFreeInternet() + randomPrize.getAmount());
-                System.out.println("Internet added");
+                System.out.println(randomPrize.getAmount() + "Internet added");
             }
             number.setHasChance(false);
             number.setLastSpinTime(LocalDateTime.now());

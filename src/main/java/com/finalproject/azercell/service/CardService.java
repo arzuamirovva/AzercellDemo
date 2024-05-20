@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,8 @@ public class CardService {
     private final CardMapper cardMapper;
     private final UserRepository userRepository;
     private final NumberRepository numberRepository;
+    private final BalanceHistoryService balanceHistoryService;
+
     public void create(CardRequestDto cardRequestDto){
         log.info("ActionLog.CardService.create has started for card with number: {}", cardRequestDto.getNumber());
 
@@ -49,16 +52,20 @@ public class CardService {
         log.info("ActionLog.CardService.update has ended for card with id: {}", id);
     }
 
-    public List getAll(){
+    public List<CardResponseDto> getAll() {
         log.info("ActionLog.CardService.getAll has started");
 
-         List list = cardRepository.findAll().stream().map(e -> {
-             CardResponseDto dtoElement = cardMapper.mapToDto((CardEntity) e);
-             dtoElement.setOwnerName(((CardEntity) e).getUser().getFullName());
-             return dtoElement;
-         }).toList();
+        List<CardEntity> cardEntities = cardRepository.findAll();
+        List<CardResponseDto> cardResponseDtos = new ArrayList<>();
+
+        for (CardEntity cardEntity : cardEntities) {
+            CardResponseDto dtoElement = cardMapper.mapToDto(cardEntity);
+            dtoElement.setOwnerName(cardEntity.getUser().getFullName());
+            cardResponseDtos.add(dtoElement);
+        }
+
         log.info("ActionLog.CardService.getAll has ended");
-        return list;
+        return cardResponseDtos;
     }
 
     public CardResponseDto get(Integer id){
@@ -93,6 +100,7 @@ public class CardService {
         }
         card.setBalance(card.getBalance() - amount);
         number.setBalance(number.getBalance() + amount);
+        balanceHistoryService.addBalanceHistory(numberId, amount);
         cardRepository.save(card);
         numberRepository.save(number);
         log.info("ActionLog.CardService.increaseBalance has started for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);

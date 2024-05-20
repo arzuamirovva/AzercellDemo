@@ -52,7 +52,7 @@ public class AuthService {
         }
         UserEntity entity = userMapper.mapToEntity(dto);
         entity.setPassword(encoder.encode(entity.getPassword()));
-        entity.setPassport((PassportEntity) passportRepository.findByFin(dto.getFin()).get()); //duzelt
+        entity.setPassport((PassportEntity) passportRepository.findByFin(dto.getFin()).get());
         entity.setRole(RoleEnum.CUSTOMER);
         userRepository.save(entity);
         var numberEntity = numberRepository.findByNumber(dto.getNumber()).orElseThrow(() -> new NotFoundException("Number Not Found"));
@@ -80,7 +80,6 @@ public class AuthService {
             LoginResponseDto response = new LoginResponseDto(username,token);
             log.info("Ended");
             return response;
-//            return ResponseEntity.status(HttpStatus.OK).header("userId", String.valueOf(entity.getId())).body(response);
         }catch (BadCredentialsException e){
             throw new RuntimeException("Invalid Username or password");
         }catch (Throwable e){
