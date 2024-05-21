@@ -1,10 +1,8 @@
 package com.finalproject.azercell.controller;
-import com.finalproject.azercell.entity.NumberEntity;
-import com.finalproject.azercell.entity.TariffEntity;
-import com.finalproject.azercell.enums.NumberStatus;
-import com.finalproject.azercell.exception.NotFoundException;
+
 import com.finalproject.azercell.model.NumberDto;
 import com.finalproject.azercell.service.NumberService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,48 +16,41 @@ public class NumberController {
     private final NumberService numberService;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<NumberDto> getAll(){
         return numberService.getAll();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public NumberDto get(@PathVariable Integer id){
         return numberService.get(id);
     }
 
     @PutMapping("/assign-tariff/")
-    @ResponseStatus(HttpStatus.OK)
-    public void assignTariffToNumber(@RequestParam Integer id, @RequestParam Integer tariffId) {
-        numberService.assignTariffToNumber(id,tariffId);
+    public void assignTariffToNumber(HttpServletRequest request, @RequestParam Integer tariffId) {
+        numberService.assignTariffToNumber(request,tariffId);
     }
 
-    @GetMapping("/istesen/total-charge/")
-    @ResponseStatus(HttpStatus.OK)
-    public Double checkPriceForIsteSen(@RequestParam Integer minutes,@RequestParam Double internetGb) {
-        return numberService.checkPriceForIsteSen(minutes, internetGb);
+    @GetMapping("/your-own/total-charge/")
+    public Double checkPriceForYourOwn(@RequestParam Integer minutes,@RequestParam Double internetGb) {
+        return numberService.checkPriceForYourOwn(minutes, internetGb);
     }
 
-    @PutMapping("/assign-istesen/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void connectToIsteSen(@RequestParam Integer minutes,@RequestParam Double internetGb,@PathVariable Integer id) {
-        numberService.connectToIsteSen(minutes, internetGb, id);
+    @PutMapping("/assign-your-own/{id}")
+    public void connectToOwnTariff(@RequestParam Integer minutes,@RequestParam Double internetGb,@PathVariable Integer id) {
+        numberService.connectToOwnTariff(minutes, internetGb, id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/remove/your-own/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeIsteSenSubscriptionForNumber(@PathVariable Integer id) {
-        numberService.removeIsteSenSubscriptionForNumber(id);
+    public void removeYourOwnSubscriptionForNumber(@PathVariable Integer id) {
+        numberService.removeYourOwnSubscriptionForNumber(id);
     }
-    @PatchMapping("/remove-tariff/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/remove-tariff/{id}")
     public void removeSubscriptionForNumber(@PathVariable Integer id) {
         numberService.removeSubscriptionForNumber(id);
     }
 
     @PatchMapping("/status/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public void deactivateNumber(@PathVariable Integer id){
         numberService.deactivateNumber(id);
     }

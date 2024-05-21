@@ -17,13 +17,11 @@ public class PrizeController {
     private final PrizeService prizeService;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<PrizeDto> getAll() {
         return prizeService.getAll();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public PrizeDto get(@PathVariable Integer id) {
         return prizeService.get(id);
     }
@@ -35,7 +33,6 @@ public class PrizeController {
     }
 
     @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public void update(@PathVariable Integer id, @RequestBody PrizeDto prizeDto) {
         prizeService.update(id,prizeDto);
     }

@@ -2,9 +2,7 @@ package com.finalproject.azercell.entity;
 
 import com.finalproject.azercell.enums.RoleEnum;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -25,13 +23,13 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "user", orphanRemoval = true)
     private List<CardEntity> cards;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "passport_id")
     private PassportEntity passport;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "user")
     private List<NumberEntity> numbers;
 }

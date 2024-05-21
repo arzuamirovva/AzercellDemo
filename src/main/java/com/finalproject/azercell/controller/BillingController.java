@@ -1,8 +1,7 @@
 package com.finalproject.azercell.controller;
 
-import com.finalproject.azercell.entity.NumberEntity;
-import com.finalproject.azercell.entity.TariffEntity;
 import com.finalproject.azercell.service.BillingService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,21 +13,21 @@ public class BillingController {
 
     private final BillingService billingService;
 
-    @PatchMapping("/calls/{numberId}/{durationInMinutes}")
+    @PatchMapping("/calls/{durationInMinutes}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void chargeForCallDuration(@PathVariable int numberId, @PathVariable int durationInMinutes) {
-        billingService.chargeForCallDuration(numberId,durationInMinutes);
+    public void chargeForCallDuration(HttpServletRequest request, @PathVariable int durationInMinutes) {
+        billingService.chargeForCallDuration(request,durationInMinutes);
     }
 
-    @PatchMapping("/internet/{numberId}/{dataUsageInMB}")
+    @PatchMapping("/internet/{dataUsageInMB}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void chargeForInternetUsage(@PathVariable int numberId, @PathVariable double dataUsageInMB) {
-        billingService.chargeForInternetUsage(numberId,dataUsageInMB);
+    public void chargeForInternetUsage(HttpServletRequest request, @PathVariable double dataUsageInMB) {
+        billingService.chargeForInternetUsage(request,dataUsageInMB);
     }
 
-    @PatchMapping("/sms/{numberId}/{numberOfMessages}")
+    @PatchMapping("/sms/{numberOfMessages}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void chargeForSentMessages(@PathVariable int numberId, @PathVariable int numberOfMessages) {
-        billingService.chargeForSentMessages(numberId,numberOfMessages);
+    public void chargeForSentMessages(HttpServletRequest request, @PathVariable int numberOfMessages) {
+        billingService.chargeForSentMessages(request,numberOfMessages);
     }
 }

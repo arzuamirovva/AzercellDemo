@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface CardRepository extends CrudRepository<CardEntity, Integer> {
 
     List<CardEntity> findAll();
+
+    Optional<CardEntity> findByNumber(String number);
 }

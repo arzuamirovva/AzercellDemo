@@ -7,6 +7,6 @@ import java.util.List;
 
 
 public interface TariffRepository extends CrudRepository<TariffEntity,Integer>{
-    List findAll();
+    List<TariffEntity> findAll();
 
 }

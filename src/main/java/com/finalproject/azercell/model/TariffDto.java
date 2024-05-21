@@ -18,6 +18,7 @@ public class TariffDto {
 
     private Integer id;
     private String name;
+    private String description;
     private Double chargePerMinute;
     private Double chargePerMB;
     private Double chargePerSMS;
@@ -26,7 +27,8 @@ public class TariffDto {
     private Integer smsAmount;
     private Double subscriptionPrice;
     private Double monthlyPrice;
-    private String description;
+
+    private Integer validPeriod;
 
 //    public void generateEndDate() {
 //        this.endDate = this.startDate.plusMonths(1);

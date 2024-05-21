@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface AppRepository extends CrudRepository<AppEntity,Integer> {
 
-    List findAll();
+    List<AppEntity> findAll();
 
 }

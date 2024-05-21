@@ -1,12 +1,13 @@
 package com.finalproject.azercell.service;
 
+import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.PrizeEntity;
 import com.finalproject.azercell.enums.PrizeType;
 import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.repository.NumberRepository;
 import com.finalproject.azercell.repository.PrizeRepository;
-import com.finalproject.azercell.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class SpinService {
 
     private final NumberRepository numberRepository;
     private final PrizeRepository prizeRepository;
+    private final JwtUtil jwtUtil;
 
     public void checkSpinTime(Integer numberId) {
         log.info("ActionLog.SpinService.checkSpinTime has started for {}",numberId);
@@ -35,7 +37,8 @@ public class SpinService {
         log.info("ActionLog.SpinService.checkSpinTime has ended for {}",numberId);
     }
 
-    public void spin(Integer numberId) {
+    public void spin(HttpServletRequest request) {
+        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
         log.info("ActionLog.SpinService.spin has started for {}",numberId);
 
         NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number Not Found"));

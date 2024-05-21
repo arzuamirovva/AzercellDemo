@@ -2,8 +2,6 @@ package com.finalproject.azercell.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.cglib.core.Local;
-
 import java.time.LocalDate;
 
 @Table( name = "apps")

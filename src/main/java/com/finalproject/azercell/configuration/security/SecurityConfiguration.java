@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,22 +48,29 @@ public class SecurityConfiguration {
                         authorize -> authorize
 //                                .anyRequest().hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/user/").hasAnyRole("ADMIN","CUSTOMER")
-                                .requestMatchers("/user/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/user/details").authenticated()
+                                .requestMatchers(HttpMethod.GET,"/user/{id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/user").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/user").authenticated()
+                                .requestMatchers(HttpMethod.DELETE,"/user/{id}").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/tariff/**").authenticated()
                                 .requestMatchers("/tariff/**").hasRole("ADMIN")
                                 .requestMatchers("/spin").hasRole("CUSTOMER")
                                 .requestMatchers(HttpMethod.GET,"/apps/**").authenticated()
                                 .requestMatchers("/apps/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PATCH,"/billing/**").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/balance-history/**").authenticated()
-                                .requestMatchers("/card/**").authenticated() //
+                                .requestMatchers(HttpMethod.GET, "/balance-history/{id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/balance-history/list/").authenticated()
+                                .requestMatchers("/card/balance").authenticated()
+                                .requestMatchers(HttpMethod.POST,"/card").authenticated()
+                                .requestMatchers(HttpMethod.PUT,"/card/{id}").authenticated()
                                 .requestMatchers(HttpMethod.PUT,"/numbers/**").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/number/status/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/numbers/{id}").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PATCH, "/numbers/remove-tariff/{id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/numbers/{id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/numbers").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/numbers/istesen/total-charge/").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/numbers/your-own/total-charge/").authenticated()
 //                                .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers(permitSwagger).permitAll()
                                 .requestMatchers("/auth/register","/auth/login").permitAll()

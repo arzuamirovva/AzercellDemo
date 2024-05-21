@@ -30,21 +30,23 @@ public class NumberEntity {
     private LocalDateTime lastSpinTime;
     private Boolean hasChance;
     private Integer freeMinutes=0;
-    private Integer freeInternet=0;
+    private Double freeInternet=0.0;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    private LocalDateTime assignTime;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "tariff_id")
     private TariffEntity tariff;
 
     @OneToOne(mappedBy = "number")
-    @JoinColumn(name = "isteSenTariff_id")
-    public IsteSenTariffEntity isteSenTariff;
+//    @JoinColumn(name = "yourOwn_id")
+    public YourOwnTariffEntity yourOwnTariff;
 
-    @OneToMany(mappedBy = "number" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "number" ,cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<BalanceHistoryEntity> balanceHistoryList;
 
@@ -56,7 +58,7 @@ public class NumberEntity {
     public Integer getFreeMinutes() {
         return this.freeMinutes != null ? this.freeMinutes : 0;
     }
-    public Integer getFreeInternet() {
-        return this.freeInternet != null ? this.freeInternet : 0;
+    public Double getFreeInternet() {
+        return this.freeInternet != null ? this.freeInternet : 0.0;
     }
 }

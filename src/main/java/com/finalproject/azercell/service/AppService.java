@@ -25,7 +25,7 @@ public class AppService {
 
         var entity = appMapper.mapToEntity(appDto);
         appRepository.save(entity);
-        log.info("ActionLog.AppService.create has ended");
+        log.info("ActionLog.AppService.create has ended for {}", appDto.getName());
 
     }
 
@@ -35,12 +35,11 @@ public class AppService {
         entity.setId(id);
         appRepository.findById(id);
         log.info("ActionLog.AppService.update has ended for id {}", id);
-
     }
 
-    public List<AppEntity> getAll() {
+    public List<AppDto> getAll() {
         log.info("ActionLog.AppService.getAll has started");
-        List<AppEntity> list = appRepository.findAll().stream().map(e -> appMapper.mapToDto((AppEntity) e)).toList();
+        List<AppDto> list = appRepository.findAll().stream().map(appMapper::mapToDto).toList();
         log.info("ActionLog.AppService.getAll has ended");
         return list;
     }

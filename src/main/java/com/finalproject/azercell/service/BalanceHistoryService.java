@@ -1,21 +1,18 @@
 package com.finalproject.azercell.service;
 
+import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.BalanceHistoryEntity;
 import com.finalproject.azercell.entity.NumberEntity;
-import com.finalproject.azercell.entity.UserEntity;
 import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.mapper.BalanceHistoryMapper;
 import com.finalproject.azercell.model.BalanceHistoryDto;
 import com.finalproject.azercell.repository.BalanceHistoryRepository;
 import com.finalproject.azercell.repository.NumberRepository;
-import com.finalproject.azercell.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -26,6 +23,8 @@ public class BalanceHistoryService {
     private final BalanceHistoryRepository balanceHistoryRepository;
     private final NumberRepository numberRepository;
     private final BalanceHistoryMapper balanceHistoryMapper;
+    private final JwtUtil jwtUtil;
+
     public void addBalanceHistory(Integer numberId, Double amount) {
         log.info("ActionLog.BalanceHistoryService.addBalanceHistory has started for numberId: {} with amount: {}", numberId, amount);
 
@@ -44,7 +43,8 @@ public class BalanceHistoryService {
     }
 
 
-    public List<BalanceHistoryDto> getAllForNumber(Integer numberId) {
+    public List<BalanceHistoryDto> getAllForNumber(HttpServletRequest request) {
+        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
         log.info("ActionLog.BalanceHistoryService.getForNumber has started for numberId: {}", numberId);
 
         NumberEntity number = numberRepository.findById(numberId)

@@ -23,6 +23,6 @@ public class PassportEntity {
     private String serialNumber;
     private String fin;
 
-    @OneToOne(cascade = CascadeType.ALL,mappedBy = "passport")
+    @OneToOne(cascade = CascadeType.PERSIST,mappedBy = "passport")
     private UserEntity user;
 }

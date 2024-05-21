@@ -23,19 +23,16 @@ public class AppController {
     }
 
     @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public void update(@PathVariable Integer id, @RequestBody AppDto appDto){
         appService.update(id, appDto);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<AppEntity> getAll(){
+    public List<AppDto> getAll(){
         return appService.getAll();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public AppEntity get(@PathVariable Integer id){
         return appService.get(id);
     }

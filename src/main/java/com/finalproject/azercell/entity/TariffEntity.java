@@ -3,7 +3,6 @@ package com.finalproject.azercell.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Table( name = "tariffs")
@@ -24,7 +23,9 @@ public class TariffEntity {
     private Double monthlyPrice;
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "tariff")
+    private Integer validPeriod;
+
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "tariff")
     private List<NumberEntity> numbers;
 
 }

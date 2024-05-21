@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/migrations/009-create-tariff-table.sql
+  - include:
+      file: liquibase/migrations/006-create-passport-table.sql
+  - include:
+      file: liquibase/migrations/010-create-users-table.sql
+  - include:
+      file: liquibase/migrations/005-create-numbers-table.sql
+  - include:
+      file: liquibase/migrations/004-create-your-own-tariff-table.sql
+  - include:
+      file: liquibase/migrations/002-create-balance-history-table.sql
+  - include:
+      file: liquibase/migrations/003-create-cards-table.sql
+  - include:
+      file: liquibase/migrations/007-create-prizes-table.sql
+  - include:
+      file: liquibase/migrations/008-create-spins-table.sql
+  - include:
+      file: liquibase/migrations/011-insert-passports.sql
+  - include:
+      file: liquibase/migrations/014-insert-users.sql
+  - include:
+      file: liquibase/migrations/012-insert-numbers.sql
+  - include:
+      file: liquibase/migrations/013-insert-cards.sql
+  - include:
+      file: liquibase/migrations/015-insert-tariff.sql
+  - include:
+      file: liquibase/migrations/001-create-apps-table.sql
+
+
+

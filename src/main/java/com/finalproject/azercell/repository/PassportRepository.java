@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface PassportRepository extends CrudRepository<PassportEntity, Integer> {
 
-    Optional findByFin(String fin);
+    Optional<PassportEntity> findByFin(String fin);
 }

@@ -15,7 +15,7 @@ public class BalanceHistoryEntity {
     private Double amount;
     private LocalDateTime transactionDate;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "number_id")
     private NumberEntity number;
 

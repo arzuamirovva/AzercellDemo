@@ -2,11 +2,12 @@ package com.finalproject.azercell.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Random;
 
 @Table(name = "cards")
@@ -22,17 +23,18 @@ public class CardEntity {
     private Double balance;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    public void createBalance(){
-        Random random = new Random();
-        Double test = random.nextDouble(0,5000) + 1;
-        DecimalFormat df = new DecimalFormat("#.##");
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        df.setDecimalFormatSymbols(dfs);
-        this.balance = Double.parseDouble(df.format(test));
-    }
+//    public void createBalance(){
+//        Random random = new Random();
+//        Double test = random.nextDouble(0,5000) + 1;
+//        DecimalFormat df = new DecimalFormat("#.##");
+//        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+//        dfs.setDecimalSeparator('.');
+//        df.setDecimalFormatSymbols(dfs);
+//        this.balance = Double.parseDouble(df.format(test));
+//    }
 
 }

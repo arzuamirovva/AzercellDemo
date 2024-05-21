@@ -1,4 +1,5 @@
 package com.finalproject.azercell.service;
+
 import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.PassportEntity;
@@ -39,31 +40,30 @@ public class AuthService {
     private final UserMapper userMapper;
 
 
-
-    public void register(UserRequestDto dto){
-        log.info("ActionLog.AuthService.register method has started");
-        PassportEntity passport = (PassportEntity) passportRepository.findByFin(dto.getFin()).orElseThrow();
-        if (userRepository.findByPassport(passport).isPresent()){
+    public void register(UserRequestDto dto) {
+        log.info("ActionLog.AuthService.register has started for number {}", dto.getNumber());
+        PassportEntity passport = passportRepository.findByFin(dto.getFin()).orElseThrow(() -> new NotFoundException("Passport is not found"));
+        if (userRepository.findByPassport(passport).isPresent()) {
             throw new UserAlreadyExist("User Already Exist");
         }
         String number = dto.getNumber();
-        if (numberRepository.findByNumber(number).isEmpty()){
+        if (numberRepository.findByNumber(number).isEmpty()) {
             throw new NotFoundException("THIS_NUMBER_NOT_FOUND");
         }
         UserEntity entity = userMapper.mapToEntity(dto);
         entity.setPassword(encoder.encode(entity.getPassword()));
-        entity.setPassport((PassportEntity) passportRepository.findByFin(dto.getFin()).get());
+        entity.setPassport(passportRepository.findByFin(dto.getFin()).orElseThrow(() -> new NotFoundException("Passport is not found")));
         entity.setRole(RoleEnum.CUSTOMER);
         userRepository.save(entity);
         var numberEntity = numberRepository.findByNumber(dto.getNumber()).orElseThrow(() -> new NotFoundException("Number Not Found"));
         numberEntity.setUser(entity);
         numberEntity.setPassword(entity.getPassword());
         numberRepository.save(numberEntity);
-        log.info("ActionLog.UserService.create has ended");
+        log.info("ActionLog.AuthService.register has ended for number {}", dto.getNumber());
     }
 
-    public LoginResponseDto login(LoginRequestDto request){
-        log.info("Started");
+    public LoginResponseDto login(LoginRequestDto request) {
+        log.info("ActionLog.AuthService.login has started for number {}", request.getNumber());
         NumberEntity numberEntity = numberRepository.findByNumber(request.getNumber()).orElseThrow();
         System.out.println(numberEntity.getNumber());
         UserEntity user = numberEntity.getUser();
@@ -77,16 +77,13 @@ public class AuthService {
 
             String token = jwtUtil.createToken(numberEntity1);
 
-            LoginResponseDto response = new LoginResponseDto(username,token);
-            log.info("Ended");
+            LoginResponseDto response = new LoginResponseDto(username, token);
+            log.info("ActionLog.AuthService.login has successfully completed for number {}", request.getNumber());
             return response;
-        }catch (BadCredentialsException e){
+        } catch (BadCredentialsException e) {
             throw new RuntimeException("Invalid Username or password");
-        }catch (Throwable e){
+        } catch (Throwable e) {
             throw new RuntimeException(e.getMessage());
         }
     }
-
-
-
 }

@@ -22,12 +22,12 @@ public class PrizeService {
     }
 
     public PrizeDto get(Integer id) {
-        log.info("ActionLog.PrizeService.get has started");
+        log.info("ActionLog.PrizeService.get has started for prize {}", id);
 
         PrizeDto dto = prizeMapper.mapToDto(prizeRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("PRIZE_NOT_FOUND")
         ));
-        log.info("ActionLog.PrizeService.get has ended");
+        log.info("ActionLog.PrizeService.get has ended for prize {}", id);
         return dto;
     }
 
@@ -41,23 +41,21 @@ public class PrizeService {
     }
 
     public void update(Integer id, PrizeDto prizeDto) {
-        log.info("ActionLog.PrizeService.update has started");
+        log.info("ActionLog.PrizeService.update has started for prize {}", id);
 
         var entity = prizeMapper.mapToEntity(prizeDto);
         entity.setId(id);
         prizeRepository.save(entity);
-        log.info("ActionLog.PrizeService.update has ended");
-
+        log.info("ActionLog.PrizeService.update has ended for prize {}", id);
     }
 
     public void delete(Integer id) {
-        log.info("ActionLog.PrizeService.delete has started");
+        log.info("ActionLog.PrizeService.delete has started for prize {}", id);
 
-        if (prizeRepository.existsById(id)){
+        if (prizeRepository.existsById(id)) {
             prizeRepository.deleteById(id);
-            log.info("ActionLog.PrizeService.delete has started");
-
-        }else{
+            log.info("ActionLog.PrizeService.delete has ended for prize {}", id);
+        } else {
             throw new NotFoundException("Prize not found");
         }
     }

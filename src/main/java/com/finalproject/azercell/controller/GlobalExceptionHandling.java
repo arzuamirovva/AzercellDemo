@@ -46,4 +46,12 @@ public class GlobalExceptionHandling {
         log.info("error -> {}", exception.getMessage());
         return new ExceptionDTO(exception.getMessage());
     }
+
+
+    @ExceptionHandler(UnknownCardException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDTO handle(UnknownCardException exception){
+        log.info("error -> {}", exception.getMessage());
+        return new ExceptionDTO(exception.getMessage());
+    }
 }

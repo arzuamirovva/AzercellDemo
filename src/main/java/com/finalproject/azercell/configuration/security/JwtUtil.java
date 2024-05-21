@@ -1,5 +1,6 @@
 package com.finalproject.azercell.configuration.security;
 
+import com.finalproject.azercell.entity.CardEntity;
 import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.UserEntity;
 import com.finalproject.azercell.enums.RoleEnum;
@@ -53,7 +54,7 @@ public class JwtUtil {
         }
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("authorities",roles);
-//        claimsMap.put("username", client.getUsername());
+        claimsMap.put("number_id", client.getId());
         claimsMap.put("user_id", client.getUser().getId());
 
         Date tokenCreateTime = new Date();
@@ -116,6 +117,13 @@ public class JwtUtil {
     }
 
 
+    public Integer getNumberId(Claims claims){
+        return (Integer) claims.get("number_id");
+    }
+
+    public List<CardEntity> getCards(Claims claims){
+        return (List<CardEntity>) claims.get("cards");
+    }
 
     public Collection<GrantedAuthority> extractAuthorities(Claims claims) {
         Collection<GrantedAuthority> authorities = new ArrayList<>();

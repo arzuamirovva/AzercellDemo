@@ -1,5 +1,6 @@
 package com.finalproject.azercell.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,5 +22,6 @@ public class CardRequestDto {
     @Future(message = "Expiration date must be in the future")
     private LocalDate expDate;
 
+    @JsonIgnore
     private Integer userId;
 }

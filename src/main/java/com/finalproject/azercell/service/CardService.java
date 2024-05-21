@@ -1,22 +1,27 @@
 package com.finalproject.azercell.service;
 
+import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.CardEntity;
 import com.finalproject.azercell.entity.NumberEntity;
+import com.finalproject.azercell.entity.UserEntity;
 import com.finalproject.azercell.exception.NotEnoughBalanceException;
 import com.finalproject.azercell.exception.NotFoundException;
+import com.finalproject.azercell.exception.UnknownCardException;
 import com.finalproject.azercell.mapper.CardMapper;
 import com.finalproject.azercell.model.CardRequestDto;
 import com.finalproject.azercell.model.CardResponseDto;
 import com.finalproject.azercell.repository.CardRepository;
 import com.finalproject.azercell.repository.NumberRepository;
 import com.finalproject.azercell.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.security.sasl.AuthenticationException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @Slf4j
@@ -28,29 +33,22 @@ public class CardService {
     private final UserRepository userRepository;
     private final NumberRepository numberRepository;
     private final BalanceHistoryService balanceHistoryService;
+    private final JwtUtil jwtUtil;
 
-    public void create(CardRequestDto cardRequestDto){
-        log.info("ActionLog.CardService.create has started for card with number: {}", cardRequestDto.getNumber());
 
-        Integer userId = cardRequestDto.getUserId();
-        CardEntity cardEntity = cardMapper.mapToEntity(cardRequestDto);
-        cardEntity.setUser(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User Not Found")));
-        cardEntity.createBalance();
-        cardRepository.save(cardEntity);
-        log.info("ActionLog.CardService.create has started for card with number: {}", cardRequestDto.getNumber());
+    public void addCard(CardRequestDto cardRequestDto, HttpServletRequest request){
+        CardEntity card = cardRepository.findByNumber(cardRequestDto.getNumber())
+                .orElseThrow(() -> new NotFoundException("Card not found in the database"));
+        Integer userId = jwtUtil.getUserId(jwtUtil.resolveClaims(request));
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        CardResponseDto cardResponseDto = cardMapper.mapToDto(card);
+        cardResponseDto.setOwnerName(userRepository.findById(userId).orElseThrow(()-> new NotFoundException("User Not Found")).getFullName());
+        card.setUser(userEntity);
+        cardRepository.save(card);
     }
 
-    public void update(Integer id, CardRequestDto cardRequestDto){
-        log.info("ActionLog.CardService.update has started for card with id: {}", id);
-
-        if (!cardRepository.existsById(id)){
-            throw new NotFoundException("THIS_CARD_IS_NOT_FOUND");
-        }
-        var entity = cardMapper.mapToEntity(cardRequestDto);
-        entity.setId(id);
-        cardRepository.save(entity);
-        log.info("ActionLog.CardService.update has ended for card with id: {}", id);
-    }
 
     public List<CardResponseDto> getAll() {
         log.info("ActionLog.CardService.getAll has started");
@@ -68,34 +66,39 @@ public class CardService {
         return cardResponseDtos;
     }
 
-    public CardResponseDto get(Integer id){
+    public CardResponseDto get(Integer id) {
         log.info("ActionLog.CardService.get has started for id {}", id);
 
         CardResponseDto dto = cardMapper.mapToDto(cardRepository.findById(id).orElseThrow(() -> new NotFoundException("CARD_IS_NOT_FOUND")));
-        String ownerName = userRepository.findById(cardRepository.findById(id).orElseThrow(() -> new NotFoundException("Not Found User")).getUser().getId()).
-                orElseThrow(() -> new NotFoundException("Not found a card")).getFullName();
-        dto.setOwnerName(ownerName);
-        log.info("ActionLog.CardService.get has ended for id {}", id);
 
+        log.info("ActionLog.CardService.get has ended for id {}", id);
         return dto;
     }
 
-    public void delete(Integer id){
+    public void delete(Integer numberId, Integer id) {
         log.info("ActionLog.CardService.delete has started for id {}", id);
-
-        if (!cardRepository.existsById(id)){
+        if (!cardRepository.existsById(id)) {
             throw new NotFoundException("THIS_CARD_IS_NOT_FOUND");
         }
-        cardRepository.deleteById(id);
+        if (!checkCardsOwner(numberId, id)) {
+            cardRepository.deleteById(id);
+        } else {
+            throw new UnknownCardException("You can't delete this card");
+        }
         log.info("ActionLog.CardService.delete has ended for id {}", id);
-
     }
 
-    public void increaseBalance(Integer numberId, Double amount, Integer cardId){
+    public void increaseBalance(HttpServletRequest request, Double amount, Integer cardId) {
+        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
         log.info("ActionLog.CardService.increaseBalance has started for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
-        CardEntity card = cardRepository.findById(cardId).orElseThrow(()-> new NotFoundException("Card is not found"));
-        NumberEntity number = numberRepository.findById(numberId).orElseThrow(()-> new NotFoundException("Number is not found"));
-        if (amount > card.getBalance()){
+
+        CardEntity card = cardRepository.findById(cardId).orElseThrow(() -> new NotFoundException("Card is not found"));
+        NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number is not found"));
+
+        if (!checkCardsOwner(numberId, cardId)) {
+            throw new UnknownCardException("Card is unknown");
+        }
+        if (amount > card.getBalance()) {
             throw new NotEnoughBalanceException("Not enough balance");
         }
         card.setBalance(card.getBalance() - amount);
@@ -103,6 +106,22 @@ public class CardService {
         balanceHistoryService.addBalanceHistory(numberId, amount);
         cardRepository.save(card);
         numberRepository.save(number);
-        log.info("ActionLog.CardService.increaseBalance has started for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
+
+        log.info("ActionLog.CardService.increaseBalance has ended for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
+    }
+
+    public boolean checkCardsOwner(Integer numberId, Integer cardId) {
+        log.info("ActionLog.CardService.checkCardsOwner has started for numberId: {} and cardId: {}", numberId, cardId);
+        boolean has = false;
+        NumberEntity number = numberRepository.findById(numberId)
+                .orElseThrow(() -> new NotFoundException("Number Not Found"));
+        UserEntity user = number.getUser();
+        CardEntity card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new NotFoundException("Card Not Found"));
+        if (card.getUser().equals(user)) {
+            has = true;
+        }
+        log.info("ActionLog.CardService.checkCardsOwner has ended for numberId: {} and cardId: {}", numberId, cardId);
+        return has;
     }
 }

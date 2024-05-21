@@ -23,8 +23,8 @@ public class NumberDto {
     @NotBlank(message = "Number cannot be blank")
     private String number;
 
-    @NotBlank(message = "Password cannot be blank")
-    private String password;
+//    @NotBlank(message = "Password cannot be blank")
+//    private String password;
 
     @NotNull(message = "Status cannot be null")
     private NumberStatus status;
