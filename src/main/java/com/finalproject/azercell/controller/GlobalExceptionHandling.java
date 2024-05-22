@@ -54,4 +54,18 @@ public class GlobalExceptionHandling {
         log.info("error -> {}", exception.getMessage());
         return new ExceptionDTO(exception.getMessage());
     }
+
+    @ExceptionHandler(NoChanceException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDTO handle(NoChanceException exception){
+        log.info("error -> {}", exception.getMessage());
+        return new ExceptionDTO(exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidStatusException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDTO handle(InvalidStatusException exception){
+        log.info("error -> {}", exception.getMessage());
+        return new ExceptionDTO(exception.getMessage());
+    }
 }

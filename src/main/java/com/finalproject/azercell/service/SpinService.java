@@ -3,7 +3,10 @@ package com.finalproject.azercell.service;
 import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.NumberEntity;
 import com.finalproject.azercell.entity.PrizeEntity;
+import com.finalproject.azercell.enums.NumberStatus;
 import com.finalproject.azercell.enums.PrizeType;
+import com.finalproject.azercell.exception.InvalidStatusException;
+import com.finalproject.azercell.exception.NoChanceException;
 import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.repository.NumberRepository;
 import com.finalproject.azercell.repository.PrizeRepository;
@@ -39,29 +42,31 @@ public class SpinService {
 
     public void spin(HttpServletRequest request) {
         Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
-        log.info("ActionLog.SpinService.spin has started for {}",numberId);
-
-        NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number Not Found"));
+        log.info("ActionLog.SpinService.spin has started for {}", numberId);
+        NumberEntity number = numberRepository.findById(numberId)
+                .orElseThrow(() -> new NotFoundException("Number Not Found"));
         checkSpinTime(numberId);
 
-        if (number.getHasChance()) {
-            List<PrizeEntity> prizes = prizeRepository.findAll();
-            PrizeEntity randomPrize = prizes.get(new Random().nextInt(prizes.size()));
-
-            if (randomPrize.getPrizeType().equals(PrizeType.MINUTES)) {
-                number.setFreeMinutes(number.getFreeMinutes() + randomPrize.getAmount());
-                System.out.println(randomPrize.getAmount() + "Minutes added");
-            } else if (randomPrize.getPrizeType().equals(PrizeType.INTERNET)) {
-                number.setFreeInternet(number.getFreeInternet() + randomPrize.getAmount());
-                System.out.println(randomPrize.getAmount() + "Internet added");
-            }
-            number.setHasChance(false);
-            number.setLastSpinTime(LocalDateTime.now());
-            numberRepository.save(number);
-            log.info("ActionLog.SpinService.spin has ended for {}",numberId);
-
-        } else {
-            throw new NotFoundException("NO_CHANCE");
+        if (number.getStatus() != NumberStatus.ACTIVE) {
+            throw new InvalidStatusException("Number is not active");
         }
+        if (!number.getHasChance()) {
+            throw new NoChanceException("No chance available");
+        }
+        List<PrizeEntity> prizes = prizeRepository.findAll();
+        PrizeEntity randomPrize = prizes.get(new Random().nextInt(prizes.size()));
+
+        if (randomPrize.getPrizeType().equals(PrizeType.MINUTES)) {
+            number.setFreeMinutes(number.getFreeMinutes() + randomPrize.getAmount());
+            System.out.println(randomPrize.getAmount() + " Minutes added");
+        } else if (randomPrize.getPrizeType().equals(PrizeType.INTERNET)) {
+            number.setFreeInternet(number.getFreeInternet() + randomPrize.getAmount());
+            System.out.println(randomPrize.getAmount() + " Internet added");
+        }
+
+        number.setHasChance(false);
+        number.setLastSpinTime(LocalDateTime.now());
+        numberRepository.save(number);
+        log.info("ActionLog.SpinService.spin has ended for {}", numberId);
     }
 }

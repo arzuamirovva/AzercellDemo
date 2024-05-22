@@ -28,6 +28,8 @@ databaseChangeLog:
   - include:
       file: liquibase/migrations/015-insert-tariff.sql
   - include:
+      file: liquibase/migrations/016-insert-prizes.sql
+  - include:
       file: liquibase/migrations/001-create-apps-table.sql
 
 

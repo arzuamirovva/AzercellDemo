@@ -1,6 +1,7 @@
 package com.finalproject.azercell.service;
 import com.finalproject.azercell.configuration.security.JwtUtil;
 import com.finalproject.azercell.entity.NumberEntity;
+import com.finalproject.azercell.enums.NumberStatus;
 import com.finalproject.azercell.exception.NotEnoughBalanceException;
 import com.finalproject.azercell.exception.NotFoundException;
 import com.finalproject.azercell.repository.NumberRepository;
@@ -19,13 +20,20 @@ public class BillingService {
     private final NumberRepository numberRepository;
     private final JwtUtil jwtUtil;
 
+
+    private void checkNumberIsActive(NumberEntity number) {
+        if (number.getStatus() != NumberStatus.ACTIVE) {
+            throw new NotFoundException("Number is not active");
+        }
+    }
+
     public void chargeForCallDuration(HttpServletRequest request, int durationInMinutes) {
         Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
 
         log.info("ActionLog.BillingService.chargeForCallDuration has started for {} and durationMinute is {}", numberId, durationInMinutes);
         NumberEntity number = numberRepository.findById(numberId)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + numberId));
-
+        checkNumberIsActive(number);
         if (number.getFreeMinutes() != null && number.getFreeMinutes() > 0) {
             if (number.getFreeMinutes() >= durationInMinutes) {
                 number.setFreeMinutes(number.getFreeMinutes() - durationInMinutes);
@@ -72,7 +80,7 @@ public class BillingService {
 
         NumberEntity number = numberRepository.findById(numberId)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + numberId));
-
+        checkNumberIsActive(number);
         double remainingDataUsage = dataUsageInMB;
 
         if (number.getFreeInternet() != null && number.getFreeInternet() > 0) {
@@ -92,7 +100,7 @@ public class BillingService {
                     remainingDataUsage = 0;
                 } else {
                     remainingDataUsage -= number.getInternetBalance() * 1000;
-                    number.setInternetBalance(0.0);  // internetBalance sıfırlanmaz, kalan kalır.
+                    number.setInternetBalance(0.0);
                 }
             }
         }
@@ -122,7 +130,7 @@ public class BillingService {
 
         NumberEntity number = numberRepository.findById(numberId)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + numberId));
-
+        checkNumberIsActive(number);
         int remainingMessages = numberOfMessages;
 
         if (number.getSmsBalance() != null && number.getSmsBalance() > 0) {
@@ -131,7 +139,7 @@ public class BillingService {
                 remainingMessages = 0;
             } else {
                 remainingMessages -= number.getSmsBalance();
-                number.setSmsBalance(0);  // smsBalance sıfırlanmaz, kalan kalır.
+                number.setSmsBalance(0);
             }
         }
 

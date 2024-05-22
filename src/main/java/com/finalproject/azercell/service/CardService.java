@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.security.sasl.AuthenticationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,11 +79,10 @@ public class CardService {
         if (!cardRepository.existsById(id)) {
             throw new NotFoundException("THIS_CARD_IS_NOT_FOUND");
         }
-        if (!checkCardsOwner(numberId, id)) {
-            cardRepository.deleteById(id);
-        } else {
+        if (isCardOwner(numberId, id)) {
             throw new UnknownCardException("You can't delete this card");
         }
+        cardRepository.deleteById(id);
         log.info("ActionLog.CardService.delete has ended for id {}", id);
     }
 
@@ -95,7 +93,7 @@ public class CardService {
         CardEntity card = cardRepository.findById(cardId).orElseThrow(() -> new NotFoundException("Card is not found"));
         NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number is not found"));
 
-        if (!checkCardsOwner(numberId, cardId)) {
+        if (!isCardOwner(numberId, cardId)) {
             throw new UnknownCardException("Card is unknown");
         }
         if (amount > card.getBalance()) {
@@ -110,18 +108,18 @@ public class CardService {
         log.info("ActionLog.CardService.increaseBalance has ended for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
     }
 
-    public boolean checkCardsOwner(Integer numberId, Integer cardId) {
-        log.info("ActionLog.CardService.checkCardsOwner has started for numberId: {} and cardId: {}", numberId, cardId);
-        boolean has = false;
+    public boolean isCardOwner(Integer numberId, Integer cardId) {
+        log.info("ActionLog.CardService.isCardOwner has started for numberId: {} and cardId: {}", numberId, cardId);
+
         NumberEntity number = numberRepository.findById(numberId)
                 .orElseThrow(() -> new NotFoundException("Number Not Found"));
         UserEntity user = number.getUser();
         CardEntity card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new NotFoundException("Card Not Found"));
-        if (card.getUser().equals(user)) {
-            has = true;
-        }
-        log.info("ActionLog.CardService.checkCardsOwner has ended for numberId: {} and cardId: {}", numberId, cardId);
-        return has;
+
+        boolean isOwner = card.getUser().equals(user);
+
+        log.info("ActionLog.CardService.isCardOwner has ended for numberId: {} and cardId: {} with result: {}", numberId, cardId, isOwner);
+        return isOwner;
     }
 }

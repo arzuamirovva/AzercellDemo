@@ -54,4 +54,8 @@ public class NumberController {
     public void deactivateNumber(@PathVariable Integer id){
         numberService.deactivateNumber(id);
     }
+    @PatchMapping("/own/status")
+    public void deactivateOwnNumber(HttpServletRequest request){
+        numberService.deactivateOwnNumber(request);
+    }
 }

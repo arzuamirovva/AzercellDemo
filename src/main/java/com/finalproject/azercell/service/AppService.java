@@ -47,7 +47,7 @@ public class AppService {
     public AppEntity get(Integer id) {
         log.info("ActionLog.AppService.get has started for id {}", id);
         AppEntity app = appRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("APP_IS_NOT_FOUND")
+                () -> new NotFoundException("APP NOT FOUND")
         );
         log.info("ActionLog.AppService.get has ended for id {}", id);
         return app;
@@ -56,7 +56,7 @@ public class AppService {
     public void delete(Integer id) {
         log.info("ActionLog.AppService.delete has started for id {}", id);
         if (!appRepository.existsById(id)) {
-            throw new NotFoundException("THIS_TARIFF_PACKAGE_IS_NOT_FOUND");
+            throw new NotFoundException("APP NOT FOUND");
         }
         appRepository.deleteById(id);
         log.info("ActionLog.AppService.delete has ended for id {}", id);

@@ -70,6 +70,18 @@ public class NumberService {
         log.info("ActionLog.NumberService.deactivateNumber has ended for number {}", id);
     }
 
+    public void deactivateOwnNumber(HttpServletRequest request){
+        Integer id = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
+        log.info("ActionLog.NumberService.deactivateNumber has started for number {}", id);
+
+        NumberEntity numberEntity = numberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Number not found"));
+
+        numberEntity.setStatus(NumberStatus.MANUAL_DEACTIVATED);
+        numberRepository.save(numberEntity);
+        log.info("ActionLog.NumberService.deactivateNumber has ended for number {}", id);
+    }
+
 
     public void deactivateNumbersDaily() {
         log.info("ActionLog.NumberService.deactivateNumbersDaily has started");
@@ -158,16 +170,16 @@ public class NumberService {
         log.info("ActionLog.NumberService.connectToOwnTariff has started for number {}", id);
         NumberEntity number = numberRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Number not found"));
-
+        if (number.getStatus() != NumberStatus.ACTIVE){
+            throw new NumberIsNotActiveException("Number is not active");
+        }
         number.setTariff(null);
         YourOwnTariffEntity newTariff = YourOwnTariffEntity.builder().number(number)
                 .minutes(minutes)
                 .internetAmount(internetGb)
                 .totalCharge(checkPriceForYourOwn(minutes, internetGb))
                 .build();
-        if (number.getStatus() != NumberStatus.ACTIVE){
-            throw new NumberIsNotActiveException("Number is not active");
-        }
+
         if (number.getBalance() < newTariff.getTotalCharge()){
             throw new NotEnoughBalanceException("Not enough balance");
         }
