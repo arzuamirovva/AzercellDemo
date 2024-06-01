@@ -13,19 +13,19 @@ public class BillingController {
 
     private final BillingService billingService;
 
-    @PatchMapping("/calls/{durationInMinutes}")
+    @PutMapping("/calls/{minutesUsed}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void chargeForCallDuration(HttpServletRequest request, @PathVariable int durationInMinutes) {
-        billingService.chargeForCallDuration(request,durationInMinutes);
+    public void chargeForCallDuration(HttpServletRequest request, @PathVariable int minutesUsed) {
+        billingService.chargeForCallDuration(request,minutesUsed);
     }
 
-    @PatchMapping("/internet/{dataUsageInMB}")
+    @PutMapping("/internet/{dataUsageInMB}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void chargeForInternetUsage(HttpServletRequest request, @PathVariable double dataUsageInMB) {
         billingService.chargeForInternetUsage(request,dataUsageInMB);
     }
 
-    @PatchMapping("/sms/{numberOfMessages}")
+    @PutMapping("/sms/{numberOfMessages}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void chargeForSentMessages(HttpServletRequest request, @PathVariable int numberOfMessages) {
         billingService.chargeForSentMessages(request,numberOfMessages);

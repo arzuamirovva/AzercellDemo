@@ -31,6 +31,7 @@ public class NumberEntity {
     private Boolean hasChance;
     private Integer freeMinutes=0;
     private Double freeInternet=0.0;
+    private Boolean hasCredit;
 
     private LocalDateTime assignTime;
 

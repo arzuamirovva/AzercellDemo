@@ -76,7 +76,6 @@ public class UserService {
         return dto;
     }
 
-
     public void delete(Integer id){
         log.info("ActionLog.UserService.delete has started for user {}", id);
         UserEntity userEntity = userRepository.findById(id).orElseThrow(()->new NotFoundException("User Not Found 2"));
@@ -97,9 +96,6 @@ public class UserService {
     }
 
     public void breakConnectivity(UserEntity user){
-//        NumberEntity numberEntity = numberRepository.findByUser(user).orElseThrow(()-> new NotFoundException("Number Not Found 3"));
-//        numberEntity.setUser(null);
-//        numberRepository.save(numberEntity);
         CardEntity cardEntity = cardRepository.findByUser(user).orElseThrow(()-> new NotFoundException("Card Not Found 5"));
         List<CardEntity> cardEntities = cardRepository.findAllByUser(user);
         List<NumberEntity> numberEntities = numberRepository.findAllByUser(user);

@@ -8,6 +8,8 @@ import com.finalproject.azercell.enums.PrizeType;
 import com.finalproject.azercell.exception.InvalidStatusException;
 import com.finalproject.azercell.exception.NoChanceException;
 import com.finalproject.azercell.exception.NotFoundException;
+import com.finalproject.azercell.mapper.PrizeMapper;
+import com.finalproject.azercell.model.PrizeDto;
 import com.finalproject.azercell.repository.NumberRepository;
 import com.finalproject.azercell.repository.PrizeRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -27,6 +30,7 @@ public class SpinService {
     private final NumberRepository numberRepository;
     private final PrizeRepository prizeRepository;
     private final JwtUtil jwtUtil;
+    private final PrizeMapper prizeMapper;
 
     public void checkSpinTime(Integer numberId) {
         log.info("ActionLog.SpinService.checkSpinTime has started for {}",numberId);
@@ -40,7 +44,7 @@ public class SpinService {
         log.info("ActionLog.SpinService.checkSpinTime has ended for {}",numberId);
     }
 
-    public void spin(HttpServletRequest request) {
+        public PrizeDto spin(HttpServletRequest request) {
         Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
         log.info("ActionLog.SpinService.spin has started for {}", numberId);
         NumberEntity number = numberRepository.findById(numberId)
@@ -56,6 +60,7 @@ public class SpinService {
         List<PrizeEntity> prizes = prizeRepository.findAll();
         PrizeEntity randomPrize = prizes.get(new Random().nextInt(prizes.size()));
 
+        PrizeDto prizeDto = prizeMapper.mapToDto(randomPrize);
         if (randomPrize.getPrizeType().equals(PrizeType.MINUTES)) {
             number.setFreeMinutes(number.getFreeMinutes() + randomPrize.getAmount());
             System.out.println(randomPrize.getAmount() + " Minutes added");
@@ -68,5 +73,6 @@ public class SpinService {
         number.setLastSpinTime(LocalDateTime.now());
         numberRepository.save(number);
         log.info("ActionLog.SpinService.spin has ended for {}", numberId);
+        return prizeDto;
     }
 }

@@ -1,20 +1,14 @@
 package com.finalproject.azercell.service;
 
 import com.finalproject.azercell.configuration.security.JwtUtil;
-import com.finalproject.azercell.entity.YourOwnTariffEntity;
-import com.finalproject.azercell.entity.TariffEntity;
-import com.finalproject.azercell.entity.NumberEntity;
+import com.finalproject.azercell.entity.*;
 import com.finalproject.azercell.enums.NumberStatus;
-import com.finalproject.azercell.exception.NotEnoughBalanceException;
-import com.finalproject.azercell.exception.NotFoundException;
-import com.finalproject.azercell.exception.NumberIsNotActiveException;
-import com.finalproject.azercell.exception.TariffCreateException;
+import com.finalproject.azercell.exception.*;
 import com.finalproject.azercell.mapper.NumberMapper;
+import com.finalproject.azercell.mapper.YourOwnMapper;
 import com.finalproject.azercell.model.NumberDto;
-import com.finalproject.azercell.repository.BalanceHistoryRepository;
-import com.finalproject.azercell.repository.IsteSenTariffRepository;
-import com.finalproject.azercell.repository.NumberRepository;
-import com.finalproject.azercell.repository.TariffRepository;
+import com.finalproject.azercell.model.YourOwnDto;
+import com.finalproject.azercell.repository.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +31,8 @@ public class NumberService {
     private final IsteSenTariffRepository isteSenTariffRepository;
     private final TariffRepository tariffRepository;
     private final JwtUtil jwtUtil;
+    private final CardRepository cardRepository;
+    private final YourOwnMapper yourOwnMapper;
 
 
 
@@ -55,7 +51,7 @@ public class NumberService {
         NumberDto dto = numberMapper.mapToDto(numberRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("NUMBER_NOT_FOUND"))
         );
-        log.info("ActionLog.NumberService.get has ended for number {}", id);
+        log.info("ActionLog.NumberService.get has ended for number {}", id); //DTO
         return dto;
     }
 
@@ -121,11 +117,8 @@ public class NumberService {
             throw new NumberIsNotActiveException("Number is not active");
         }
         TariffEntity tariffEntity = tariffRepository.findById(tariffId).orElseThrow(() -> new NotFoundException("This tariff is not found"));
-        number.setTariff(tariffEntity);
-        number.setInternetBalance(tariffEntity.getInternetAmount());
-        number.setMinuteBalance(tariffEntity.getMinuteAmount());
-        number.setSmsBalance(tariffEntity.getSmsAmount());
-        number.setAssignTime(LocalDateTime.now());
+
+        assign(number, tariffEntity);
 
         double totalCharge = tariffEntity.getSubscriptionPrice()+tariffEntity.getMonthlyPrice();
         if (number.getBalance() < totalCharge){
@@ -138,6 +131,13 @@ public class NumberService {
         log.info("ActionLog.NumberService.assignTariffToNumber has ended");
     }
 
+    public void assign(NumberEntity number, TariffEntity tariffEntity){
+        number.setTariff(tariffEntity);
+        number.setInternetBalance(tariffEntity.getInternetAmount());
+        number.setMinuteBalance(tariffEntity.getMinuteAmount());
+        number.setSmsBalance(tariffEntity.getSmsAmount());
+        number.setAssignTime(LocalDateTime.now());
+    }
     public void removeSubscriptionForNumber(Integer id) {
 
         log.info("ActionLog.NumberService.removeSubscriptionForNumber has started for number {}", id);
@@ -166,7 +166,8 @@ public class NumberService {
         }
     }
 
-    public void connectToOwnTariff(Integer minutes, Double internetGb, Integer id){
+    public void connectToOwnTariff(Integer minutes, Double internetGb,HttpServletRequest request){
+        Integer id = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
         log.info("ActionLog.NumberService.connectToOwnTariff has started for number {}", id);
         NumberEntity number = numberRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Number not found"));
@@ -180,6 +181,7 @@ public class NumberService {
                 .totalCharge(checkPriceForYourOwn(minutes, internetGb))
                 .build();
 
+        YourOwnDto yourOwnDto = yourOwnMapper.mapToDto(newTariff);
         if (number.getBalance() < newTariff.getTotalCharge()){
             throw new NotEnoughBalanceException("Not enough balance");
         }
@@ -226,5 +228,64 @@ public class NumberService {
             }
         }
         log.info("ActionLog.NumberService.checkValidity has ended");
+    }
+
+    public void increaseBalance(HttpServletRequest request, Double amount, Integer cardId) {
+        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
+        log.info("ActionLog.NumberService.increaseBalance has started for numberId: {} with amount: {} and cardId: {}", numberId, amount, cardId);
+
+        NumberEntity number = numberRepository.findById(numberId)
+                .orElseThrow(() -> new NotFoundException("Number not found"));
+
+        CardEntity card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new NotFoundException("Card is not found"));
+
+        if (!isCardOwner(number.getUser().getId(), cardId)) {
+            throw new UnknownCardException("Card is unknown");
+        }
+
+        if (amount > card.getBalance()) {
+            throw new NotEnoughBalanceException("Not enough balance in card");
+        }
+        card.setBalance(card.getBalance() - amount);
+        number.setBalance(number.getBalance() + amount);
+        if (number.getHasCredit()) {
+            if (number.getBalance() >= 4) {
+                number.setBalance(number.getBalance() - 4);
+                number.setHasCredit(false);
+            }
+        }
+
+        cardRepository.save(card);
+        numberRepository.save(number);
+
+        BalanceHistoryEntity balanceHistory = new BalanceHistoryEntity();
+        balanceHistory.setNumber(number);
+        balanceHistory.setAmount(amount);
+        balanceHistory.setTransactionDate(LocalDateTime.now());
+        balanceHistoryRepository.save(balanceHistory);
+
+        log.info("ActionLog.NumberService.increaseBalance has ended for numberId: {} with amount: {} and cardId: {}", numberId, amount, cardId);
+    }
+
+    public void addCreditToBalance(HttpServletRequest request) {
+        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
+        log.info("ActionLog.NumberService.addCreditToBalance has started for numberId: {} ", numberId);
+
+        NumberEntity number = numberRepository.findById(numberId)
+                .orElseThrow(() -> new NotFoundException("Number not found"));
+
+        number.setBalance(number.getBalance() + 3);
+        number.setHasCredit(true);
+        numberRepository.save(number);
+
+        log.info("ActionLog.NumberService.addCreditToBalance has ended for numberId: {}", numberId);
+    }
+
+    private boolean isCardOwner(Integer userId, Integer cardId) {
+        CardEntity card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new NotFoundException("Card Not Found"));
+
+        return card.getUser().getId().equals(userId);
     }
 }

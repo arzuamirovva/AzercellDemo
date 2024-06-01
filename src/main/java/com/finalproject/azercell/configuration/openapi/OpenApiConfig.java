@@ -15,12 +15,9 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
                         name = "Arzu Amirova",
                         email = "byamirlii1@gmail.com"
                 ),
-                description = "demo security",
+                description = "Azercell Kabinetim",
                 title = "security api",
                 version = "1.0",
-                license = @License(
-                        name = "Licence name"
-                ),
                 termsOfService = "Terms of service"
         ),
         security = {

@@ -31,7 +31,6 @@ public class CardService {
     private final CardMapper cardMapper;
     private final UserRepository userRepository;
     private final NumberRepository numberRepository;
-    private final BalanceHistoryService balanceHistoryService;
     private final JwtUtil jwtUtil;
 
 
@@ -86,27 +85,29 @@ public class CardService {
         log.info("ActionLog.CardService.delete has ended for id {}", id);
     }
 
-    public void increaseBalance(HttpServletRequest request, Double amount, Integer cardId) {
-        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
-        log.info("ActionLog.CardService.increaseBalance has started for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
-
-        CardEntity card = cardRepository.findById(cardId).orElseThrow(() -> new NotFoundException("Card is not found"));
-        NumberEntity number = numberRepository.findById(numberId).orElseThrow(() -> new NotFoundException("Number is not found"));
-
-        if (!isCardOwner(numberId, cardId)) {
-            throw new UnknownCardException("Card is unknown");
-        }
-        if (amount > card.getBalance()) {
-            throw new NotEnoughBalanceException("Not enough balance");
-        }
-        card.setBalance(card.getBalance() - amount);
-        number.setBalance(number.getBalance() + amount);
-        balanceHistoryService.addBalanceHistory(numberId, amount);
-        cardRepository.save(card);
-        numberRepository.save(number);
-
-        log.info("ActionLog.CardService.increaseBalance has ended for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
-    }
+//    public void increaseBalance(HttpServletRequest request, Double amount, Integer cardId) {
+//        Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
+//        log.info("ActionLog.CardService.increaseBalance has started for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
+//
+//        CardEntity card = cardRepository.findById(cardId)
+//                .orElseThrow(() -> new NotFoundException("Card is not found"));
+//        NumberEntity number = numberRepository.findById(numberId)
+//                .orElseThrow(() -> new NotFoundException("Number is not found"));
+//
+//        if (!isCardOwner(numberId, cardId)) {
+//            throw new UnknownCardException("Card is unknown");
+//        }
+//        if (amount > card.getBalance()) {
+//            throw new NotEnoughBalanceException("Not enough balance");
+//        }
+//        card.setBalance(card.getBalance() - amount);
+//        number.setBalance(number.getBalance() + amount);
+//        balanceHistoryService.addBalanceHistory(numberId, amount);
+//        cardRepository.save(card);
+//        numberRepository.save(number);
+//
+//        log.info("ActionLog.CardService.increaseBalance has ended for numberId: {} with amount: {} using cardId: {}", numberId, amount, cardId);
+//    }
 
     public boolean isCardOwner(Integer numberId, Integer cardId) {
         log.info("ActionLog.CardService.isCardOwner has started for numberId: {} and cardId: {}", numberId, cardId);

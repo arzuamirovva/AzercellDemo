@@ -27,41 +27,41 @@ public class BillingService {
         }
     }
 
-    public void chargeForCallDuration(HttpServletRequest request, int durationInMinutes) {
+    public void chargeForCallDuration(HttpServletRequest request, int minutesUsed) {
         Integer numberId = jwtUtil.getNumberId(jwtUtil.resolveClaims(request));
 
-        log.info("ActionLog.BillingService.chargeForCallDuration has started for {} and durationMinute is {}", numberId, durationInMinutes);
+        log.info("chargeForCallDuration start: numberId = {}, durationMinute = {}", numberId, minutesUsed);
         NumberEntity number = numberRepository.findById(numberId)
                 .orElseThrow(() -> new NotFoundException("Number not found with id: " + numberId));
         checkNumberIsActive(number);
         if (number.getFreeMinutes() != null && number.getFreeMinutes() > 0) {
-            if (number.getFreeMinutes() >= durationInMinutes) {
-                number.setFreeMinutes(number.getFreeMinutes() - durationInMinutes);
-                durationInMinutes = 0;
+            if (number.getFreeMinutes() >= minutesUsed) {
+                number.setFreeMinutes(number.getFreeMinutes() - minutesUsed);
+                minutesUsed = 0;
             } else {
-                durationInMinutes -= number.getFreeMinutes();
+                minutesUsed -= number.getFreeMinutes();
                 number.setFreeMinutes(0);
             }
         }
 
-        if (durationInMinutes > 0) {
+        if (minutesUsed > 0) {
             if (number.getMinuteBalance() != null && number.getMinuteBalance() > 0) {
-                if (number.getMinuteBalance() >= durationInMinutes) {
-                    number.setMinuteBalance(number.getMinuteBalance() - durationInMinutes);
-                    durationInMinutes = 0;
+                if (number.getMinuteBalance() >= minutesUsed) {
+                    number.setMinuteBalance(number.getMinuteBalance() - minutesUsed);
+                    minutesUsed = 0;
                 } else {
-                    durationInMinutes -= number.getMinuteBalance();
+                    minutesUsed -= number.getMinuteBalance();
                     number.setMinuteBalance(0);
                 }
             }
         }
 
-        if (durationInMinutes > 0) {
+        if (minutesUsed > 0) {
             double totalCharge;
             if (number.getTariff() != null) {
-                totalCharge = durationInMinutes * number.getTariff().getChargePerMinute();
+                totalCharge = minutesUsed * number.getTariff().getChargePerMinute();
             } else {
-                totalCharge = durationInMinutes * 0.06;
+                totalCharge = minutesUsed * 0.06;
             }
             if (number.getBalance() - totalCharge >= 0) {
                 number.setBalance(number.getBalance() - totalCharge);
@@ -70,8 +70,8 @@ public class BillingService {
             }
         }
 
-        numberRepository.save(number);
-        log.info("ActionLog.BillingService.chargeForCallDuration has ended for {} and balance is {}", numberId, number.getBalance());
+        NumberEntity numberEntity = numberRepository.save(number);
+        log.info("chargeForCallDuration end: numberEntity->{}", numberEntity);
     }
 
     public void chargeForInternetUsage(HttpServletRequest request, double dataUsageInMB) {

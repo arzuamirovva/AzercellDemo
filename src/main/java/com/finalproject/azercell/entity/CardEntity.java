@@ -27,14 +27,6 @@ public class CardEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-//    public void createBalance(){
-//        Random random = new Random();
-//        Double test = random.nextDouble(0,5000) + 1;
-//        DecimalFormat df = new DecimalFormat("#.##");
-//        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-//        dfs.setDecimalSeparator('.');
-//        df.setDecimalFormatSymbols(dfs);
-//        this.balance = Double.parseDouble(df.format(test));
-//    }
+
 
 }
